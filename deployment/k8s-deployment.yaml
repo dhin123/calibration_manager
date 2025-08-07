@@ -1,0 +1,127 @@
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: calibration
+---
+# PostgreSQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: calibration
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:13
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: calibration_db
+        - name: POSTGRES_USER
+          value: calibration_user
+        - name: POSTGRES_PASSWORD
+          value: calibration_pass
+---
+# Calibration Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calibration-service
+  namespace: calibration
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: calibration-service
+  template:
+    metadata:
+      labels:
+        app: calibration-service
+    spec:
+      containers:
+      - name: calibration-service
+        image: calibration-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5001
+        env:
+        - name: TESTING
+          value: "false"
+        - name: SQLALCHEMY_DATABASE_URI
+          value: "postgresql://calibration_user:calibration_pass@postgres:5432/calibration_db"
+        - name: PYTHONPATH
+          value: "/app:/app/common_packages"
+---
+# Tag Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tag-service
+  namespace: calibration
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tag-service
+  template:
+    metadata:
+      labels:
+        app: tag-service
+    spec:
+      containers:
+      - name: tag-service
+        image: tag-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5002
+        env:
+        - name: TESTING
+          value: "false"
+        - name: SQLALCHEMY_DATABASE_URI
+          value: "postgresql://calibration_user:calibration_pass@postgres:5432/calibration_db"
+        - name: PYTHONPATH
+          value: "/app:/app/common_packages"
+---
+# API Gateway Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: calibration
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - name: api-gateway
+        image: api-gateway:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+        env:
+        - name: TESTING
+          value: "false"
+        - name: CALIBRATION_SERVICE_URL
+          value: "http://calibration-service:5001"
+        - name: TAG_SERVICE_URL
+          value: "http://tag-service:5002"
+        - name: PYTHONPATH
+          value: "/app:/app/common_packages"

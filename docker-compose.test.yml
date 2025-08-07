@@ -1,0 +1,22 @@
+# docker-compose.test.yml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: calibration_user
+      POSTGRES_PASSWORD: calibration_pass
+      POSTGRES_DB: calibration_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U calibration_user -d calibration_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  postgres_test_data:

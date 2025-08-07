@@ -1,0 +1,52 @@
+# PostgreSQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: calibration
+spec:
+  selector:
+    app: postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+---
+# Calibration Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: calibration-service
+  namespace: calibration
+spec:
+  selector:
+    app: calibration-service
+  ports:
+  - port: 5001
+    targetPort: 5001
+---
+# Tag Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: tag-service
+  namespace: calibration
+spec:
+  selector:
+    app: tag-service
+  ports:
+  - port: 5002
+    targetPort: 5002
+---
+# API Gateway Service (External Access)
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  namespace: calibration
+spec:
+  selector:
+    app: api-gateway
+  ports:
+  - port: 5000
+    targetPort: 5000
+  type: NodePort  # Works with minikube/local K8s

@@ -1,0 +1,99 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:13
+    container_name: calibration-postgres
+    environment:
+      POSTGRES_USER: calibration_user
+      POSTGRES_PASSWORD: calibration_pass
+      POSTGRES_DB: calibration_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U calibration_user -d calibration_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - calibration-network
+
+  # Calibration Service
+  calibration-service:
+    build:
+      context: .
+      dockerfile: calibration-service/Dockerfile
+    container_name: calibration-service
+    ports:
+      - "5001:5001"
+    environment:
+      - TESTING=false
+      - SQLALCHEMY_DATABASE_URI=postgresql://calibration_user:calibration_pass@postgres:5432/calibration_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - calibration-network
+
+  # Tag Service
+  tag-service:
+    build:
+      context: .
+      dockerfile: tag-service/Dockerfile
+    container_name: tag-service
+    ports:
+      - "5002:5002"
+    environment:
+      - TESTING=false
+      - SQLALCHEMY_DATABASE_URI=postgresql://calibration_user:calibration_pass@postgres:5432/calibration_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - calibration-network
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-service/Dockerfile
+    container_name: api-gateway
+    ports:
+      - "5000:5000"
+    environment:
+      - TESTING=false
+      - CALIBRATION_SERVICE_URL=http://calibration-service:5001
+      - TAG_SERVICE_URL=http://tag-service:5002
+    depends_on:
+      calibration-service:
+        condition: service_healthy
+      tag-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - calibration-network
+
+volumes:
+  postgres_data:
+
+networks:
+  calibration-network:
+    driver: bridge

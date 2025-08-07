@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="PYTHON_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/api-service" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/calibration-service" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/common_packages" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/common_packages/constants" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/common_packages/logs" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/common_packages/models" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/common_packages/schemas" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/common_packages/utils" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/deployment" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tag-service" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/venv" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
